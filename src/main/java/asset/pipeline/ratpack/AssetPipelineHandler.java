@@ -119,7 +119,7 @@ class AssetPipelineHandler implements Handler {
                             response.sendFile(gzipFile);
                         } else {
                             response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(attributeCache.getFileSize()));
-                            response.sendFile(asset);
+                            response.noCompress().sendFile(asset);
                         }
                     } else {
                         response.send();
@@ -151,7 +151,7 @@ class AssetPipelineHandler implements Handler {
                                     if (gzipAttributes == null || !gzipAttributes.isRegularFile()) {
                                         response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(attributes.size()));
                                         fileCache.put(manifestPath,new AssetAttributes(true,false, attributes.size() , null));
-                                        response.sendFile(asset);
+                                        response.noCompress().sendFile(asset);
                                     } else {
                                         response.getHeaders().set("Content-Encoding","gzip");
                                         response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(gzipAttributes.size()));
@@ -161,7 +161,7 @@ class AssetPipelineHandler implements Handler {
                                 });
                             } else {
                                 response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(attributes.size()));
-                                response.sendFile(asset);
+                                response.noCompress().sendFile(asset);
                                 readAttributes(context, gzipFile, gzipAttributes -> {
                                     if (gzipAttributes == null || !gzipAttributes.isRegularFile()) {
                                         fileCache.put(manifestPath,new AssetAttributes(true,false, attributes.size() , null));
