@@ -16,7 +16,7 @@ apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.bertramlabs.plugins'
-version = '2.2.4.SNAPSHOT'
+version = '2.2.5.SNAPSHOT'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
@@ -34,15 +34,6 @@ sourceSets {
         compileClasspath += configurations.provided
     }
 }
-// This is stuff we need to massage
-// assets {
-//     compileDir = "${buildDir}/assetCompile/assets"
-//     assetsPath = "src/ratpack/assets"
-// }
-
-// jar {
-//     from "${buildDir}/assetCompile"
-// }
 
 dependencies {
   runtime "org.slf4j:slf4j-simple:1.7.10"
