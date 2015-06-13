@@ -23,12 +23,19 @@ assets {
 
 
 dependencies {
-	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.5.SNAPSHOT'
+	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.7'
 	//Example additional LESS support
     //provided 'com.bertramlabs.plugins:less-asset-pipeline:2.0.7'
 }
 afterEvaluate{
  processResources.dependsOn assetCompile
+}
+```
+Also add the Module to your registry
+
+```groovy
+bindings {
+  module new AssetPipelineModule()
 }
 ```
 
