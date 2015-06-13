@@ -4,11 +4,14 @@ import asset.pipeline.AssetPipelineConfigHolder;
 
 class AssetPipelineLinkService {
     String getAt(String path) {
+    	String pathAlias = path;
         if(AssetPipelineConfigHolder.manifest != null) {
-            String pathAlias = AssetPipelineConfigHolder.manifest.getProperty(path);
+            pathAlias = AssetPipelineConfigHolder.manifest.getProperty(path);
             if(pathAlias == null) {
                 pathAlias = path;
             }
         }
+        //TODO: FINISH THIS
+        return pathAlias;
     }
 }

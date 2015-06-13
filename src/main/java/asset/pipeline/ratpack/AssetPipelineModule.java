@@ -1,4 +1,4 @@
-package asset.pipeline.ratpack
+package asset.pipeline.ratpack;
 
 import asset.pipeline.*;
 import com.google.common.cache.CacheBuilder;
@@ -9,10 +9,6 @@ import com.google.inject.Singleton;
 import ratpack.file.FileSystemBinding;
 import ratpack.guice.ConfigurableModule;
 import ratpack.guice.internal.GuiceUtil;
-import ratpack.handlebars.internal.FileSystemBindingTemplateLoader;
-import ratpack.handlebars.internal.HandlebarsTemplateRenderer;
-import ratpack.handlebars.internal.RatpackTemplateCache;
-import ratpack.handlebars.internal.TemplateKey;
 import ratpack.server.ServerConfig;
 import ratpack.handling.HandlerDecorator;
 import com.google.inject.multibindings.Multibinder;
