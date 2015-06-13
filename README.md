@@ -18,22 +18,21 @@ buildscript {
 
 apply plugin: 'asset-pipeline'
 assets {
-    compileDir = "${buildDir}/assetCompile/assets"
-    assetsPath = "src/ratpack/assets"
+    compileDir = "src/ratpack/assets"
 }
 
-jar {
-    from "${buildDir}/assetCompile"
-}
 
 dependencies {
 	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.5.SNAPSHOT'
 	//Example additional LESS support
     //provided 'com.bertramlabs.plugins:less-asset-pipeline:2.0.7'
 }
+afterEvaluate{
+ processResources.dependsOn assetCompile
+}
 ```
 
-In your ratpack assets folder create organizational subfolders i.e. `src/ratpack/assets/javascripts` or `src/ratpack/assets/stylesheets`.
+In your ratpack assets folder create organizational subfolders i.e. `assets/javascripts` or `assets/stylesheets`.
 
 You can reference these files in your html templates via `/assets/application.js`. The md5 url replacement work is still in progress as Ratpack spec gets finalized.
 

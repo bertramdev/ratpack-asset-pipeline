@@ -37,7 +37,8 @@ public class AssetPipelineService implements Service {
             }
 
         } else {
-            AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application",path.toString() + "/assets"));
+            // AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application",path.toString() + "/assets"));
+            AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application","assets"));
         }
     }
 }
