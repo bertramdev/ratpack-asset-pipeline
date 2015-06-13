@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 * This handler is registered via a GUICE module to handle all assets
 * @author David Estes
 */
-class AssetPipelineHandler implements Handler {
+public class AssetPipelineHandler implements Handler {
     ConcurrentHashMap<String,AssetAttributes> fileCache = new ConcurrentHashMap<String,AssetAttributes>();
 
     public void handle(Context context) throws Exception {

@@ -13,7 +13,7 @@ import ratpack.server.ServerConfig;
 import ratpack.handling.HandlerDecorator;
 import com.google.inject.multibindings.Multibinder;
 
-class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.Config>{
+public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.Config>{
     public static class Config {
         String assetsPath = "assets";
     }

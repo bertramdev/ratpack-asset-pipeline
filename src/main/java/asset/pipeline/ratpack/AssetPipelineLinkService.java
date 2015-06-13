@@ -2,7 +2,7 @@ package asset.pipeline.ratpack;
 
 import asset.pipeline.AssetPipelineConfigHolder;
 
-class AssetPipelineLinkService {
+public class AssetPipelineLinkService {
     String getAt(String path) {
     	String pathAlias = path;
         if(AssetPipelineConfigHolder.manifest != null) {

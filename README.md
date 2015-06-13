@@ -23,7 +23,7 @@ assets {
 
 
 dependencies {
-	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.7'
+	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.8'
 	//Example additional LESS support
     //provided 'com.bertramlabs.plugins:less-asset-pipeline:2.0.7'
 }

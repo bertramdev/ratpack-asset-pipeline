@@ -1,6 +1,6 @@
 package asset.pipeline.ratpack;
 
-class AssetAttributes {
+public class AssetAttributes {
 	private Boolean gzipExists = false;
 	private boolean exists = false;
 	private Long fileSize;
