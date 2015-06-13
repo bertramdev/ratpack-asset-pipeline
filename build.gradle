@@ -1,35 +1,131 @@
+apply plugin: 'java'
+apply plugin: 'maven-publish'
+apply plugin: 'maven'
+apply plugin: 'com.jfrog.bintray'
+
+group = 'com.bertramlabs.plugins'
+version = '2.2.4.SNAPSHOT'
+
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
 buildscript {
   repositories {
     jcenter()
   }
   dependencies {
-    classpath "io.ratpack:ratpack-gradle:0.9.15"
-    classpath 'com.github.jengelman.gradle.plugins:shadow:1.0.2'
-    classpath 'com.bertramlabs.plugins:asset-pipeline-gradle:2.2.0'
+    classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.5'
   }
 }
 
-apply plugin: "io.ratpack.ratpack-groovy"
-apply plugin: "idea"
-apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'asset-pipeline'
 repositories {
-  jcenter()
-  mavenCentral()
+    jcenter()
+    mavenCentral()
 }
 
-assets {
-    compileDir = "${buildDir}/assetCompile/assets"
-    assetsPath = "src/ratpack/assets"
+configurations {
+    provided
 }
+sourceSets {
+    main {
+        compileClasspath += configurations.provided
+    }
+}
+// This is stuff we need to massage
+// assets {
+//     compileDir = "${buildDir}/assetCompile/assets"
+//     assetsPath = "src/ratpack/assets"
+// }
 
-jar {
-    from "${buildDir}/assetCompile"
-}
+// jar {
+//     from "${buildDir}/assetCompile"
+// }
 
 dependencies {
   runtime "org.slf4j:slf4j-simple:1.7.10"
-  compile "com.bertramlabs.plugins:asset-pipeline-core:2.2.0"
-  compile "io.ratpack:ratpack-config:0.9.15"
-  compile "io.ratpack:ratpack-handlebars:0.9.15"
+  compile "com.bertramlabs.plugins:asset-pipeline-core:2.2.3"
+  compile "org.codehaus.groovy:groovy-all:2.4.3"
+  ['ratpack-core'].each {
+    compile "io.ratpack:${it}:0.9.17"
+  }
+}
+
+// publishing {
+//     publications {
+//         maven(MavenPublication) {
+//             artifactId 'ratpack-asset-pipeline'
+//             pom.withXml {
+//                 asNode().children().last() + {
+//                     resolveStrategy = Closure.DELEGATE_FIRST
+//                     name 'ratpack-asset-pipeline'
+//                     description 'Provides asset-pipeline integration with the ratpack framework.'
+//                     url 'https://github.com/bertramdev/ratpack-asset-pipeline'
+//                     scm {
+//                         url 'https://github.com/bertramdev/ratpack-asset-pipeline'
+//                         connection 'scm:https://bertramdev@github.com/bertramdev/ratpack-asset-pipeline.git'
+//                         developerConnection 'scm:git://github.com/bertramdev/ratpack-asset-pipeline.git'
+//                     }
+//                     licenses {
+//                         license {
+//                             name 'The Apache Software License, Version 2.0'
+//                             url 'http://www.apache.org/license/LICENSE-2.0.txt'
+//                             distribution 'repo'
+//                         }
+//                     }
+//                     developers {
+//                         developer {
+//                             id 'davydotcom'
+//                             name 'David Estes'
+//                             email 'davydotcom@gmail.com'
+//                         }
+//                     }
+//                 }
+//             }
+//             from components.java
+//             artifact sourcesJar
+//             artifact javadocJar
+//         }
+//     }
+
+//     repositories {
+//         maven {
+//             credentials {
+//                 username project.properties.get('artifactoryPublishUsername')
+//                 password project.properties.get('artifactoryPublishPassword')
+//             }
+//             url "https://repo.grails.org/grails/libs-snapshots-local/"
+//         }
+//     }
+// }
+
+// bintray {
+//     if(project.hasProperty('bintrayUser')) {
+//         user = bintrayUser
+//         key = bintrayKey
+//     }
+
+//     publications = ['maven']
+//     pkg {
+//         repo = 'asset-pipeline'
+//         userOrg = 'bertramlabs'
+//         name = 'ratpack-asset-pipeline'
+//         licenses = ['Apache-2.0']
+//     }
+// }
+
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from 'build/docs/javadoc'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+        showStandardStreams = true
+    }
 }
