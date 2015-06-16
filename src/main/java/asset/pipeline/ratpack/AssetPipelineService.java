@@ -13,6 +13,7 @@ import java.util.Properties;
 import java.util.List;
 import java.util.LinkedList;
 import java.io.IOException;
+import ratpack.server.ServerConfig;
 
 /**
 * This service provides a startup configuration binding to tell the AP Config where to look for files
@@ -23,8 +24,9 @@ public class AssetPipelineService implements Service {
 
     public void onStart(StartEvent startEvent) throws IOException {
         FileSystemBinding fileSystemBinding = startEvent.getRegistry().get(FileSystemBinding.class);
+        ServerConfig serverConfig = startEvent.getRegistry().get(ServerConfig.class);
         Path path = fileSystemBinding.getFile();
-        if(path.getFileSystem().getClass().getName() == "com.sun.nio.zipfs.ZipFileSystem") {
+        if(!serverConfig.isDevelopment()) {
             // We are in production mode
             AssetPipelineConfigHolder.config.put("precompiled",true);
             Path manifest = fileSystemBinding.file("assets/manifest.properties");

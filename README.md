@@ -10,7 +10,7 @@ buildscript {
     mavenCentral()
   }
   dependencies {
-    classpath 'com.bertramlabs.plugins:asset-pipeline-gradle:2.2.5'
+    classpath 'com.bertramlabs.plugins:asset-pipeline-gradle:2.2.9'
     //Example additional LESS support
     //classpath 'com.bertramlabs.plugins:less-asset-pipeline:2.0.7'
   }
@@ -23,7 +23,7 @@ assets {
 
 
 dependencies {
-	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.8'
+	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.2.9'
 	//Example additional LESS support
     //provided 'com.bertramlabs.plugins:less-asset-pipeline:2.0.7'
 }

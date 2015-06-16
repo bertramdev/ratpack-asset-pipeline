@@ -16,7 +16,7 @@ apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.bertramlabs.plugins'
-version = '2.2.8'
+version = '2.2.9'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
@@ -121,9 +121,12 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+
+
 test {
     testLogging {
         exceptionFormat = 'full'
         showStandardStreams = true
     }
 }
+
