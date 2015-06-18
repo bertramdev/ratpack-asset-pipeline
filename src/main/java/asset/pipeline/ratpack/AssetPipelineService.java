@@ -28,7 +28,7 @@ public class AssetPipelineService implements Service {
         ServerConfig serverConfig = startEvent.getRegistry().get(ServerConfig.class);
         AssetPipelineModule.Config config = startEvent.getRegistry().get(AssetPipelineModule.Config.class);
         
-        if(config != null) {
+        if(config != null && config.getAssets() != null) {
             AssetPipelineConfigHolder.config = config.getAssets();
         }
         Path path = fileSystemBinding.getFile();
