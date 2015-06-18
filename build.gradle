@@ -16,7 +16,7 @@ apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.bertramlabs.plugins'
-version = '2.2.9'
+version = '2.3.0'
 
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
@@ -24,6 +24,7 @@ ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 repositories {
     jcenter()
     mavenCentral()
+    mavenLocal()
 }
 
 configurations {
@@ -37,7 +38,7 @@ sourceSets {
 
 dependencies {
   runtime "org.slf4j:slf4j-simple:1.7.10"
-  compile "com.bertramlabs.plugins:asset-pipeline-core:2.2.5"
+  compile "com.bertramlabs.plugins:asset-pipeline-core:2.3.0"
   compile "org.codehaus.groovy:groovy-all:2.4.3"
   ['ratpack-core','ratpack-guice'].each {
     compile "io.ratpack:${it}:0.9.17"

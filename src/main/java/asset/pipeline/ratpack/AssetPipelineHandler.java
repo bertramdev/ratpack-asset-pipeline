@@ -94,7 +94,9 @@ public class AssetPipelineHandler implements Handler {
         } else {
             //Production Mode!
             final Properties manifest = AssetPipelineConfigHolder.manifest;
-            final String manifestPath = path.startsWith("/") ? path.substring(1) : path;
+            String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
+
+            final String manifestPath = manifest.getProperty(normalizedPath,normalizedPath);
             final Path asset = context.file("assets/" + manifestPath);
             final AssetPipelineResponseBuilder responseBuilder = new AssetPipelineResponseBuilder(path,request.getHeaders().get(HttpHeaderNames.IF_NONE_MATCH));
 

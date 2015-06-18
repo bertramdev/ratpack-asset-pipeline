@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.LinkedList;
 import java.io.IOException;
 import ratpack.server.ServerConfig;
-
+import ratpack.config.ConfigData;
+import java.io.*;
 /**
 * This service provides a startup configuration binding to tell the AP Config where to look for files
 * @author David Estes
@@ -22,9 +23,14 @@ import ratpack.server.ServerConfig;
 public class AssetPipelineService implements Service {
     public List<String> events = new LinkedList<>();
 
-    public void onStart(StartEvent startEvent) throws IOException {
+    public void onStart(StartEvent startEvent) throws Exception {
         FileSystemBinding fileSystemBinding = startEvent.getRegistry().get(FileSystemBinding.class);
         ServerConfig serverConfig = startEvent.getRegistry().get(ServerConfig.class);
+        AssetPipelineModule.Config config = startEvent.getRegistry().get(AssetPipelineModule.Config.class);
+        
+        if(config != null) {
+            AssetPipelineConfigHolder.config = config.getAssets();
+        }
         Path path = fileSystemBinding.getFile();
         if(!serverConfig.isDevelopment()) {
             // We are in production mode
@@ -39,8 +45,8 @@ public class AssetPipelineService implements Service {
             }
 
         } else {
-            // AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application",path.toString() + "/assets"));
-            AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application","assets"));
+            AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application",path.toString() + "/../assets"));
+            // AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application","assets"));
         }
     }
 }

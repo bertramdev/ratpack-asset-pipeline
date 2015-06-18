@@ -12,10 +12,20 @@ import ratpack.guice.internal.GuiceUtil;
 import ratpack.server.ServerConfig;
 import ratpack.handling.HandlerDecorator;
 import com.google.inject.multibindings.Multibinder;
+import java.util.Map;
 
 public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.Config>{
     public static class Config {
-        String assetsPath = "assets";
+        private Map<String,Object> assets;
+
+        public Config assets(Map<String,Object> assets) {
+        	this.assets = assets;
+        	return this;
+        }
+
+        public Map<String,Object> getAssets() {
+        	return this.assets;
+        }
     }
 
     @Override
