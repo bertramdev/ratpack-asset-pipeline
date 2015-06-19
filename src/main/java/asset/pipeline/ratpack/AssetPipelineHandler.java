@@ -37,9 +37,10 @@ public class AssetPipelineHandler implements Handler {
         baseAssetUrl = "assets/";
     }
 
-    public AssetPipelineHandler(baseAssetUrl) {
-        if(baseAssetUrl == "/" || baseAssetUrl == "") {
+    public AssetPipelineHandler(String baseAssetUrl) {
+        if(baseAssetUrl != null &&  (baseAssetUrl.equals("/") || baseAssetUrl.equals(""))) {
             this.baseAssetUrl = null;
+            return;
         }
         this.baseAssetUrl = baseAssetUrl;
     }
@@ -52,7 +53,7 @@ public class AssetPipelineHandler implements Handler {
         .map(PathBinding::getPastBinding)
         .orElse(request.getPath());
         
-        if(baseAssetUrl) {
+        if(baseAssetUrl != null) {
             if(path.startsWith(baseAssetUrl)) {
                 path = path.substring(baseAssetUrl.length());
             } else {
@@ -72,6 +73,9 @@ public class AssetPipelineHandler implements Handler {
         } catch (URISyntaxException e) {
           throw uncheck(e);
         }
+        if(path.endsWith("/")) {
+            path = path + "index.html";
+        }
 
         // System.out.println("Requested File at Path" + path + " From - " + request.getPath());
 
@@ -88,6 +92,16 @@ public class AssetPipelineHandler implements Handler {
                 fileContents = AssetPipeline.serveUncompiledAsset(path,format, null, encoding);
             } else {
                 fileContents = AssetPipeline.serveAsset(path,format, null, encoding);
+            }
+
+            if(fileContents == null && !path.endsWith("/index.html")) {
+                path = path + "/index.html";
+                format =  "text/html";
+                if(request.getQueryParams().get("compile") == "false") {
+                    fileContents = AssetPipeline.serveUncompiledAsset(path,format, null, encoding);
+                } else {
+                    fileContents = AssetPipeline.serveAsset(path,format, null, encoding);
+                }                
             }
 
             if (fileContents != null) {
@@ -107,6 +121,12 @@ public class AssetPipelineHandler implements Handler {
                 response.status(404);
             }
         } else {
+            serveProductionAsset(path, context, request, response, format);
+
+        }
+    }
+
+    private void serveProductionAsset(String path, Context context, Request request, Response response, String format) throws Exception{
             //Production Mode!
             final Properties manifest = AssetPipelineConfigHolder.manifest;
             String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
@@ -119,6 +139,7 @@ public class AssetPipelineHandler implements Handler {
             AssetAttributes attributeCache = fileCache.get(manifestPath);
             if(attributeCache != null) {
                 if(attributeCache.exists()) {
+                    response.contentTypeIfNotSet(format);
                     if(responseBuilder.headers != null) {
                         for (Map.Entry<String, String> cursor : responseBuilder.headers.entrySet()) {
                             response.getHeaders().set(cursor.getKey(), cursor.getValue());
@@ -141,16 +162,26 @@ public class AssetPipelineHandler implements Handler {
                     } else {
                         response.send();
                     }
+                } else if(attributeCache.isDirectory()) {
+                    serveProductionAsset(path + "/index.html",context, request, response, "text/html");
+                    return;
                 } else {
                     response.status(404).send();
                 }
             } else {
                 readAttributes(context, asset, attributes -> {
                     if (attributes == null || !attributes.isRegularFile()) {
-                        fileCache.put(manifestPath,new AssetAttributes(false,false, null , null));
-                        response.status(404).send();
-                    } else {
                         
+                        if(!path.endsWith("/index.html") && attributes != null) {
+                            fileCache.put(manifestPath,new AssetAttributes(false,false,true, null , null));
+                            serveProductionAsset(path + "/index.html",context, request, response, "text/html");
+                            return;
+                        } else {
+                            fileCache.put(manifestPath,new AssetAttributes(false,false,false, null , null));
+                            response.status(404).send();
+                        }
+                    } else {
+                        response.contentTypeIfNotSet(format);
                         if(responseBuilder.headers != null) {
                             for (Map.Entry<String, String> cursor : responseBuilder.headers.entrySet()) {
                                 response.getHeaders().set(cursor.getKey(), cursor.getValue());
@@ -167,12 +198,12 @@ public class AssetPipelineHandler implements Handler {
                                 readAttributes(context, gzipFile, gzipAttributes -> {
                                     if (gzipAttributes == null || !gzipAttributes.isRegularFile()) {
                                         response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(attributes.size()));
-                                        fileCache.put(manifestPath,new AssetAttributes(true,false, attributes.size() , null));
+                                        fileCache.put(manifestPath,new AssetAttributes(true,false,false, attributes.size() , null));
                                         response.noCompress().sendFile(asset);
                                     } else {
                                         response.getHeaders().set("Content-Encoding","gzip");
                                         response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(gzipAttributes.size()));
-                                        fileCache.put(manifestPath,new AssetAttributes(true,true, attributes.size() , gzipAttributes.size()));
+                                        fileCache.put(manifestPath,new AssetAttributes(true,true,false, attributes.size() , gzipAttributes.size()));
                                         response.sendFile(gzipFile);
                                     }
                                 });
@@ -181,9 +212,9 @@ public class AssetPipelineHandler implements Handler {
                                 response.noCompress().sendFile(asset);
                                 readAttributes(context, gzipFile, gzipAttributes -> {
                                     if (gzipAttributes == null || !gzipAttributes.isRegularFile()) {
-                                        fileCache.put(manifestPath,new AssetAttributes(true,false, attributes.size() , null));
+                                        fileCache.put(manifestPath,new AssetAttributes(true,false,false, attributes.size() , null));
                                     } else {
-                                        fileCache.put(manifestPath,new AssetAttributes(true,true, attributes.size() , gzipAttributes.size()));
+                                        fileCache.put(manifestPath,new AssetAttributes(true,true,false, attributes.size() , gzipAttributes.size()));
                                     }
                                 });
                             }
@@ -193,9 +224,6 @@ public class AssetPipelineHandler implements Handler {
                     }
                 });               
             }
-
-
-        }
     }
 
     private boolean acceptsGzip(Request request) {
