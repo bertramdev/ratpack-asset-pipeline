@@ -20,7 +20,7 @@ buildscript {
 apply plugin: 'asset-pipeline'
 
 dependencies {
-	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.3.2'
+	compile 'com.bertramlabs.plugins:ratpack-asset-pipeline:2.3.3'
 	//Example additional LESS support
     //provided 'com.bertramlabs.plugins:less-asset-pipeline:2.3.0'
 }
@@ -53,6 +53,24 @@ Now you could for example change the less compiler mode with the system property
 In your `src/assets` folder create organizational subfolders i.e. `src/assets/javascripts` or `src/assets/stylesheets`.
 
 You can reference these files in your html templates via `/assets/application.js`. The md5 url replacement work is still in progress as Ratpack spec gets finalized.
+
+# Serving from Custom Mapping
+
+You can optionally add this handler to your handler chain and give it a prefix path to filter for on assets.
+For example, if you want the asset-pipeline to serve assets at the root level simply do this:
+
+```groovy
+import asset.pipeline.ratpack.AssetPipelineHandler;
+
+handlers {
+  bindings { ... } //Dont forget to still register the module
+  get {
+    render groovyMarkupTemplate("index.gtpl", title: "My Ratpack App")
+  }
+
+  handler(new AssetPipelineHandler("/"))
+}
+```
 
 ### Things to be Done
 
