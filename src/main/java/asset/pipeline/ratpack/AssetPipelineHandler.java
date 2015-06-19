@@ -30,7 +30,19 @@ import java.util.concurrent.ConcurrentHashMap;
 * @author David Estes
 */
 public class AssetPipelineHandler implements Handler {
+    private String baseAssetUrl = "assets/";
     ConcurrentHashMap<String,AssetAttributes> fileCache = new ConcurrentHashMap<String,AssetAttributes>();
+
+    public AssetPipelineHandler() {
+        baseAssetUrl = "assets/";
+    }
+
+    public AssetPipelineHandler(baseAssetUrl) {
+        if(baseAssetUrl == "/" || baseAssetUrl == "") {
+            this.baseAssetUrl = null;
+        }
+        this.baseAssetUrl = baseAssetUrl;
+    }
 
     public void handle(Context context) throws Exception {
         Request request = context.getRequest();
@@ -39,13 +51,16 @@ public class AssetPipelineHandler implements Handler {
         String path = context.maybeGet(PathBinding.class)
         .map(PathBinding::getPastBinding)
         .orElse(request.getPath());
-        String baseAssetUrl = "assets/";
-        if(path.startsWith(baseAssetUrl)) {
-            path = path.substring(baseAssetUrl.length());
-        } else {
-            context.next();
-            return;
+        
+        if(baseAssetUrl) {
+            if(path.startsWith(baseAssetUrl)) {
+                path = path.substring(baseAssetUrl.length());
+            } else {
+                context.next();
+                return;
+            }    
         }
+        
 
         if (!request.getMethod().isGet()) {
             context.clientError(405);
