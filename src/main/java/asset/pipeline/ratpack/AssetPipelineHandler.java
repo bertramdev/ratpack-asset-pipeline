@@ -118,7 +118,7 @@ public class AssetPipelineHandler implements Handler {
                     //Log something here
                 }
             } else {
-                response.status(404);
+                context.clientError(404);
             }
         } else {
             serveProductionAsset(path, context, request, response, format);
