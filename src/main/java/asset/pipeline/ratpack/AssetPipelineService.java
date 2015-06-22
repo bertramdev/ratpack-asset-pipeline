@@ -32,18 +32,15 @@ public class AssetPipelineService implements Service {
             AssetPipelineConfigHolder.config = config.getAssets();
         }
         Path path = fileSystemBinding.getFile();
-        if(!serverConfig.isDevelopment()) {
+        Path manifest = fileSystemBinding.file("assets/manifest.properties");
+        if(manifest != null && Files.exists(manifest)) {
             // We are in production mode
             AssetPipelineConfigHolder.config.put("precompiled",true);
-            Path manifest = fileSystemBinding.file("assets/manifest.properties");
-            if(manifest != null) {
-                Properties manifestProps = new Properties();
-                InputStream manIs = Files.newInputStream(manifest);
-                manifestProps.load(manIs);
-                manIs.close();
-                AssetPipelineConfigHolder.manifest = manifestProps;
-            }
-
+            Properties manifestProps = new Properties();
+            InputStream manIs = Files.newInputStream(manifest);
+            manifestProps.load(manIs);
+            manIs.close();
+            AssetPipelineConfigHolder.manifest = manifestProps;
         } else {
             AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application",path.toString() + "/../assets"));
             // AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application","assets"));
