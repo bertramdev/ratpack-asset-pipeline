@@ -26,9 +26,6 @@ import spock.lang.Specification
 
 import static asset.pipeline.ratpack.TestConstants.BASE_DIR
 
-/**
- * Created by danw on 7/11/15.
- */
 class ConfigurationFunctionalSpec extends Specification {
   private static final String RECONFIGURED_URL = "static"
 
