@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package asset.pipeline.ratpack;
+package asset.pipeline.ratpack
 
-import asset.pipeline.AssetPipelineConfigHolder;
+import java.nio.file.Path
+import java.nio.file.Paths
 
-public class AssetPipelineLinkService {
-    String getAt(String path) {
-    	String pathAlias = path;
-        if(AssetPipelineConfigHolder.manifest != null) {
-            pathAlias = AssetPipelineConfigHolder.manifest.getProperty(path);
-            if(pathAlias == null) {
-                pathAlias = path;
-            }
-        }
-        //TODO: FINISH THIS
-        return pathAlias;
-    }
+class TestConstants {
+  static Path BASE_DIR = Paths.get("src/test/ratpack")
 }

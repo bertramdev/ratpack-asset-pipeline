@@ -1,22 +1,52 @@
+/*
+ * Copyright 2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package asset.pipeline.ratpack;
 
-import asset.pipeline.*;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.reflect.TypeToken;
-import com.google.inject.Injector;
-import com.google.inject.Provides;
 import com.google.inject.Singleton;
-import ratpack.file.FileSystemBinding;
-import ratpack.guice.ConfigurableModule;
-import ratpack.guice.internal.GuiceUtil;
-import ratpack.server.ServerConfig;
-import ratpack.handling.HandlerDecorator;
 import com.google.inject.multibindings.Multibinder;
+import ratpack.guice.ConfigurableModule;
+import ratpack.handling.HandlerDecorator;
+import ratpack.handling.Handlers;
+
 import java.util.Map;
 
 public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.Config>{
     public static class Config {
+        private String url = "assets/";
+        private String indexFile = "index.html";
         private Map<String,Object> assets;
+
+        public Config url(String url) {
+          this.url = url;
+          return this;
+        }
+
+        public String getUrl() {
+          return this.url;
+        }
+
+        public Config indexFile(String indexFile) {
+          this.indexFile = indexFile;
+          return this;
+        }
+
+        public String getIndexFile() {
+          return this.indexFile;
+        }
 
         public Config assets(Map<String,Object> assets) {
         	this.assets = assets;
@@ -26,11 +56,17 @@ public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.
         public Map<String,Object> getAssets() {
         	return this.assets;
         }
+
     }
 
     @Override
     protected void configure() {
         bind(AssetPipelineService.class).in(Singleton.class);
-        Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance(HandlerDecorator.prepend(new AssetPipelineHandler()));
+        bind(AssetPipelineHandler.class).in(Singleton.class);
+
+        Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance((registry, rest) ->
+          Handlers.chain(registry, (c) -> c.all(AssetPipelineHandler.class))
+        );
     }
+
 }

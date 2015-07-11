@@ -1,57 +1,61 @@
+/*
+ * Copyright 2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package asset.pipeline.ratpack;
 
-import ratpack.handling.Handler;
+import asset.pipeline.AssetPipeline;
+import asset.pipeline.AssetPipelineConfigHolder;
+import asset.pipeline.AssetPipelineResponseBuilder;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import ratpack.file.MimeTypes;
 import ratpack.handling.Context;
-import ratpack.launch.HandlerFactory;
-import asset.pipeline.*;
-import asset.pipeline.fs.*;
-import ratpack.path.PathBinding;
+import ratpack.handling.Handler;
 import ratpack.http.Request;
 import ratpack.http.Response;
-import java.net.URISyntaxException;
+import ratpack.http.internal.HttpHeaderConstants;
+import ratpack.path.PathBinding;
+
 import java.net.URI;
-import java.io.*;
-import java.util.Date;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Map;
 import java.util.Properties;
-import ratpack.file.MimeTypes;
-import java.nio.file.Files;
-import static ratpack.file.internal.DefaultFileRenderer.sendFile;
-import static ratpack.file.internal.DefaultFileRenderer.readAttributes;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import ratpack.http.internal.HttpHeaderConstants;
-import static ratpack.util.Exceptions.uncheck;
-import static io.netty.handler.codec.http.HttpResponseStatus.NOT_MODIFIED;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static ratpack.file.internal.DefaultFileRenderer.readAttributes;
+import static ratpack.util.Exceptions.uncheck;
+
 /**
 * This handler is registered via a GUICE module to handle all assets
 * @author David Estes
 */
 public class AssetPipelineHandler implements Handler {
-    private String baseAssetUrl = "assets/";
     ConcurrentHashMap<String,AssetAttributes> fileCache = new ConcurrentHashMap<String,AssetAttributes>();
-
-    public AssetPipelineHandler() {
-        baseAssetUrl = "assets/";
-    }
-
-    public AssetPipelineHandler(String baseAssetUrl) {
-        if(baseAssetUrl != null &&  (baseAssetUrl.equals("/") || baseAssetUrl.equals(""))) {
-            this.baseAssetUrl = null;
-            return;
-        }
-        this.baseAssetUrl = baseAssetUrl;
-    }
 
     public void handle(Context context) throws Exception {
         Request request = context.getRequest();
         Response response = context.getResponse();
+        AssetPipelineModule.Config config = context.get(AssetPipelineModule.Config.class);
+        String baseAssetUrl = config.getUrl();
 
-        String path = context.maybeGet(PathBinding.class)
-        .map(PathBinding::getPastBinding)
-        .orElse(request.getPath());
+        String path = normalizePath(context.maybeGet(PathBinding.class)
+            .map(PathBinding::getPastBinding)
+            .orElse(request.getPath()));
         
         if(baseAssetUrl != null) {
             if(path.startsWith(baseAssetUrl)) {
@@ -69,12 +73,12 @@ public class AssetPipelineHandler implements Handler {
         }
 
         try {
-          path = new URI(path).getPath();
+          path = path.length() > 0 ? new URI(path).getPath() : "/";
         } catch (URISyntaxException e) {
           throw uncheck(e);
         }
         if(path.endsWith("/")) {
-            path = path + "index.html";
+            path = path + config.getIndexFile();
         }
 
         // System.out.println("Requested File at Path" + path + " From - " + request.getPath());
@@ -88,16 +92,16 @@ public class AssetPipelineHandler implements Handler {
 
         //Development/Runtime Mode
         if(AssetPipelineConfigHolder.manifest == null) {
-            if(request.getQueryParams().get("compile") == "false") {
+            if("false".equals(request.getQueryParams().get("compile"))) {
                 fileContents = AssetPipeline.serveUncompiledAsset(path,format, null, encoding);
             } else {
                 fileContents = AssetPipeline.serveAsset(path,format, null, encoding);
             }
 
-            if(fileContents == null && !path.endsWith("/index.html")) {
-                path = path + "/index.html";
+            if(fileContents == null && !path.endsWith('/'+config.getIndexFile())) {
+                path = path + '/' + config.getIndexFile();
                 format =  "text/html";
-                if(request.getQueryParams().get("compile") == "false") {
+                if("false".equals(request.getQueryParams().get("compile"))) {
                     fileContents = AssetPipeline.serveUncompiledAsset(path,format, null, encoding);
                 } else {
                     fileContents = AssetPipeline.serveAsset(path,format, null, encoding);
@@ -121,16 +125,17 @@ public class AssetPipelineHandler implements Handler {
                 context.clientError(404);
             }
         } else {
-            serveProductionAsset(path, context, request, response, format);
+            serveProductionAsset(path, config, context, request, response, format);
 
         }
     }
 
-    private void serveProductionAsset(String path, Context context, Request request, Response response, String format) throws Exception{
+    private void serveProductionAsset(String path, AssetPipelineModule.Config config, Context context, Request request, Response response, String format) throws Exception{
             //Production Mode!
             final Properties manifest = AssetPipelineConfigHolder.manifest;
             String normalizedPath = path.startsWith("/") ? path.substring(1) : path;
 
+            final String indexedPath = String.format("%s/%s", path, config.getIndexFile());
             final String manifestPath = manifest.getProperty(normalizedPath,normalizedPath);
             final Path asset = context.file("assets/" + manifestPath);
             final AssetPipelineResponseBuilder responseBuilder = new AssetPipelineResponseBuilder(path,request.getHeaders().get(HttpHeaderNames.IF_NONE_MATCH));
@@ -149,7 +154,7 @@ public class AssetPipelineHandler implements Handler {
                         response.status(responseBuilder.statusCode);
                     }
 
-                    if(responseBuilder.statusCode != 304) {
+                    if(responseBuilder.statusCode == null || responseBuilder.statusCode != 304) {
                         if(acceptsGzip(request) && attributeCache.gzipExists()) {
                             Path gzipFile = context.file("assets/" + manifestPath + ".gz");
                             response.getHeaders().set("Content-Encoding","gzip");
@@ -163,7 +168,7 @@ public class AssetPipelineHandler implements Handler {
                         response.send();
                     }
                 } else if(attributeCache.isDirectory()) {
-                    serveProductionAsset(path + "/index.html",context, request, response, "text/html");
+                    serveProductionAsset(indexedPath, config, context, request, response, "text/html");
                     return;
                 } else {
                     response.status(404).send();
@@ -172,9 +177,9 @@ public class AssetPipelineHandler implements Handler {
                 readAttributes(context, asset, attributes -> {
                     if (attributes == null || !attributes.isRegularFile()) {
                         
-                        if(!path.endsWith("/index.html") && attributes != null) {
+                        if(!path.endsWith('/'+config.getIndexFile()) && attributes != null) {
                             fileCache.put(manifestPath,new AssetAttributes(false,false,true, null , null));
-                            serveProductionAsset(path + "/index.html",context, request, response, "text/html");
+                            serveProductionAsset(indexedPath, config, context, request, response, "text/html");
                             return;
                         } else {
                             fileCache.put(manifestPath,new AssetAttributes(false,false,false, null , null));
@@ -192,7 +197,7 @@ public class AssetPipelineHandler implements Handler {
                             response.status(responseBuilder.statusCode);
                         }
 
-                        if(responseBuilder.statusCode != 304) {
+                        if(responseBuilder.statusCode == null || responseBuilder.statusCode != 304) {
                             Path gzipFile = context.file("assets/" + manifestPath + ".gz");
                             if(acceptsGzip(request)) {
                                 readAttributes(context, gzipFile, gzipAttributes -> {
@@ -233,5 +238,14 @@ public class AssetPipelineHandler implements Handler {
             return true;
         }
         return false;
+    }
+
+    private static String normalizePath(String path) {
+      String[] parts = path.split("/");
+      String fileName = parts[parts.length-1];
+      if (!fileName.contains(".")) {
+        path = path + '/';
+      }
+      return path;
     }
 }
