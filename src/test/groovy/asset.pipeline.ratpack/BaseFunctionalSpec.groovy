@@ -35,7 +35,10 @@ class BaseFunctionalSpec extends Specification {
     .registry(Guice.registry { b -> b
       .module(AssetPipelineModule)
     })
-    .handlers { }
+    .handlers { c -> c
+      .get { ctx -> ctx.render("base") }
+      .path("foo") { ctx -> ctx.render("foo") }
+    }
   } as Action<RatpackServerSpec>)
 
   void "should serve assets"() {
@@ -54,5 +57,21 @@ class BaseFunctionalSpec extends Specification {
     expect:
     response.statusCode == 200
     response.body.text.trim() == BASE_DIR.resolve("../assets/html/index.html").text
+  }
+
+  void "other handlers should remain unaffected by AP"() {
+    when:
+    def response = httpClient.get()
+
+    then:
+    response.statusCode == 200
+    response.body.text == "base"
+
+    when:
+    response = httpClient.get("foo")
+
+    then:
+    response.statusCode == 200
+    response.body.text == "foo"
   }
 }

@@ -65,7 +65,7 @@ public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.
         bind(AssetPipelineHandler.class).in(Singleton.class);
 
         Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance((registry, rest) ->
-          Handlers.chain(registry, (c) -> c.all(AssetPipelineHandler.class))
+          Handlers.chain(rest, Handlers.chain(registry, (c) -> c.all(AssetPipelineHandler.class)))
         );
     }
 
