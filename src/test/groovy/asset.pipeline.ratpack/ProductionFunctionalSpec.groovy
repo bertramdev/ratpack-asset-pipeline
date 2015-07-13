@@ -16,6 +16,7 @@
 
 package asset.pipeline.ratpack
 
+import io.netty.handler.codec.http.HttpHeaderNames
 import ratpack.func.Action
 import ratpack.guice.Guice
 import ratpack.server.RatpackServerSpec
@@ -49,5 +50,21 @@ class ProductionFunctionalSpec extends Specification {
     expect:
     response.statusCode == 200
     response.body.text.trim() == PROD_BASE_DIR.resolve("assets/index.html").text
+  }
+
+  void "gzipped accept-encoding should be respected"() {
+    given:
+    def response = httpClient.requestSpec { spec -> spec
+      .headers { h -> h
+        .set(HttpHeaderNames.ACCEPT_ENCODING, "gzip")
+      }
+      .decompressResponse(false)
+    }.get("index.html")
+    def bytes = response.body.bytes
+    def assetBytes = PROD_BASE_DIR.resolve("assets/index.html.gz").bytes
+
+    expect:
+    response.statusCode == 200
+    bytes == assetBytes
   }
 }
