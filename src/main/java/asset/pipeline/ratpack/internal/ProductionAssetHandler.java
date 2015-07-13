@@ -36,12 +36,12 @@ import static ratpack.registry.Registry.single;
 
 public class ProductionAssetHandler implements Handler {
   private static final String ASSET_BASE_PATH = "assets/";
-  private static final Map<String, AssetAttributes> fileCache = Maps.newConcurrentMap();
 
   @Override
   public void handle(Context ctx) throws Exception {
     final Properties manifest = AssetPipelineConfigHolder.manifest;
     final AssetProperties props = ctx.get(AssetProperties.class);
+    final ProductionAssetCache fileCache = ctx.get(ProductionAssetCache.class);
     Response response = ctx.getResponse();
 
     final String manifestPath = manifest.getProperty(props.getPath(), props.getPath());

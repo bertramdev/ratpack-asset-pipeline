@@ -16,6 +16,7 @@
 
 package asset.pipeline.ratpack;
 
+import asset.pipeline.ratpack.internal.ProductionAssetCache;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import ratpack.guice.ConfigurableModule;
@@ -63,6 +64,7 @@ public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.
     protected void configure() {
         bind(AssetPipelineService.class).in(Singleton.class);
         bind(AssetPipelineHandler.class).in(Singleton.class);
+        bind(ProductionAssetCache.class).in(Singleton.class);
 
         Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance((registry, rest) ->
           Handlers.chain(rest, Handlers.chain(registry, (c) -> c.all(AssetPipelineHandler.class)))

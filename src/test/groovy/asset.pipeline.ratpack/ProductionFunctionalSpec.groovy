@@ -16,13 +16,17 @@
 
 package asset.pipeline.ratpack
 
+import asset.pipeline.ratpack.internal.ProductionAssetCache
+import asset.pipeline.ratpack.internal.ProductionAssetHandler
 import io.netty.handler.codec.http.HttpHeaderNames
 import ratpack.func.Action
 import ratpack.guice.Guice
+import ratpack.registry.Registry
 import ratpack.server.RatpackServerSpec
 import ratpack.server.ServerConfig
 import ratpack.test.embed.EmbeddedApp
 import spock.lang.AutoCleanup
+import spock.lang.Shared
 import spock.lang.Specification
 
 import static asset.pipeline.ratpack.TestConstants.PROD_BASE_DIR
@@ -32,6 +36,9 @@ import static asset.pipeline.ratpack.TestConstants.PROD_BASE_DIR
  */
 class ProductionFunctionalSpec extends Specification {
 
+  @Shared
+  ProductionAssetCache fileCache = new ProductionAssetCache()
+
   @AutoCleanup
   @Delegate
   EmbeddedApp app = of({ spec ->
@@ -40,7 +47,9 @@ class ProductionFunctionalSpec extends Specification {
         .registry(Guice.registry { b -> b
           .module(AssetPipelineModule)
         })
-        .handlers { }
+        .handlers { c -> c
+          .all { ctx -> ctx.next(Registry.single(ProductionAssetCache, fileCache))}
+        }
   } as Action<RatpackServerSpec>)
 
   void "should serve prod files"() {
@@ -75,5 +84,13 @@ class ProductionFunctionalSpec extends Specification {
     expect:
     response.statusCode == 200
     response.body.text == PROD_BASE_DIR.resolve("assets/index.html").text
+  }
+
+  void "should serve assets from file cache when available"() {
+    when:
+    httpClient.get()
+
+    then:
+    fileCache.containsKey("/index.html")
   }
 }
