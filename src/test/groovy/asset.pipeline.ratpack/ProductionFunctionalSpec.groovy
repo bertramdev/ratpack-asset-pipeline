@@ -49,7 +49,7 @@ class ProductionFunctionalSpec extends Specification {
 
     expect:
     response.statusCode == 200
-    response.body.text.trim() == PROD_BASE_DIR.resolve("assets/index.html").text
+    response.body.text == PROD_BASE_DIR.resolve("assets/index.html").text
   }
 
   void "gzipped accept-encoding should be respected"() {
@@ -66,5 +66,14 @@ class ProductionFunctionalSpec extends Specification {
     expect:
     response.statusCode == 200
     bytes == assetBytes
+  }
+
+  void "should serve index file for default path"() {
+    given:
+    def response = httpClient.get()
+
+    expect:
+    response.statusCode == 200
+    response.body.text == PROD_BASE_DIR.resolve("assets/index.html").text
   }
 }
