@@ -143,6 +143,6 @@ public class ProductionAssetHandler implements Handler {
 
   private boolean acceptsGzip(Context ctx) {
     String acceptsEncoding = ctx.getRequest().getHeaders().get(HttpHeaderNames.ACCEPT_ENCODING);
-    return Arrays.asList(acceptsEncoding.split(",")).contains("gzip");
+    return acceptsEncoding != null && Arrays.asList(acceptsEncoding.split(",")).contains("gzip");
   }
 }

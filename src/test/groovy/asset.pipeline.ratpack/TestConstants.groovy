@@ -21,4 +21,5 @@ import java.nio.file.Paths
 
 class TestConstants {
   static Path BASE_DIR = Paths.get("src/test/ratpack")
+  static Path PROD_BASE_DIR = Paths.get("src/test/prod/ratpack")
 }
