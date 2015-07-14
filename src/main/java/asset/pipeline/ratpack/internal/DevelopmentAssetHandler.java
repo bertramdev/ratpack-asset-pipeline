@@ -58,7 +58,7 @@ public class DevelopmentAssetHandler implements Handler {
   }
 
   private static boolean shouldCompile(Context context) {
-    return "true".equals(context.getRequest().getQueryParams().get(COMPILE_PARAM));
+    return !"false".equals(context.getRequest().getQueryParams().get(COMPILE_PARAM));
   }
 
   private static void setNoCache(Context context, long contentLength) {
