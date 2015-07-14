@@ -27,9 +27,19 @@ import java.util.Map;
 
 public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.Config>{
     public static class Config {
+        private String sourcePath = "/../assets";
         private String url = "assets/";
         private String indexFile = "index.html";
         private Map<String,Object> assets;
+
+        public Config sourcePath(String sourcePath) {
+          this.sourcePath = sourcePath;
+          return this;
+        }
+
+        public String getSourcePath() {
+          return this.sourcePath;
+        }
 
         public Config url(String url) {
           this.url = url;

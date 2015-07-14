@@ -34,21 +34,11 @@ import java.util.Properties;
  */
 public class AssetPipelineService implements Service {
 
-  private final String assetSourcePath;
-
-  public AssetPipelineService() {
-    this("/../assets");
-  }
-
-  public AssetPipelineService(String assetSourcePath) {
-    this.assetSourcePath = assetSourcePath.startsWith("/") ? assetSourcePath : "/" + assetSourcePath;
-  }
-
   public void onStart(StartEvent startEvent) throws Exception {
     FileSystemBinding fileSystemBinding = startEvent.getRegistry().get(FileSystemBinding.class);
     AssetPipelineModule.Config config = startEvent.getRegistry().get(AssetPipelineModule.Config.class);
 
-    if (config != null && config.getAssets() != null) {
+    if (config.getAssets() != null) {
       AssetPipelineConfigHolder.config = config.getAssets();
     }
     Path path = fileSystemBinding.getFile();
@@ -62,7 +52,7 @@ public class AssetPipelineService implements Service {
       manIs.close();
       AssetPipelineConfigHolder.manifest = manifestProps;
     } else {
-      AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application", path.resolve(assetSourcePath).toFile().getCanonicalPath()));
+      AssetPipelineConfigHolder.registerResolver(new FileSystemAssetResolver("application", path.resolve(config.getSourcePath()).toFile().getCanonicalPath()));
     }
   }
 }
