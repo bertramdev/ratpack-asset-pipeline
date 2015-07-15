@@ -14,20 +14,11 @@
  * limitations under the License.
  */
 
-package asset.pipeline.ratpack;
+package asset.pipeline.ratpack.internal;
 
-import asset.pipeline.AssetPipelineConfigHolder;
+import asset.pipeline.ratpack.AssetAttributes;
 
-public class AssetPipelineLinkService {
-    String getAt(String path) {
-    	String pathAlias = path;
-        if(AssetPipelineConfigHolder.manifest != null) {
-            pathAlias = AssetPipelineConfigHolder.manifest.getProperty(path);
-            if(pathAlias == null) {
-                pathAlias = path;
-            }
-        }
-        //TODO: FINISH THIS
-        return pathAlias;
-    }
+import java.util.concurrent.ConcurrentHashMap;
+
+public class ProductionAssetCache extends ConcurrentHashMap<String, AssetAttributes> {
 }

@@ -16,6 +16,7 @@
 
 package asset.pipeline.ratpack;
 
+import asset.pipeline.ratpack.internal.ProductionAssetCache;
 import com.google.inject.Singleton;
 import com.google.inject.multibindings.Multibinder;
 import ratpack.guice.ConfigurableModule;
@@ -26,9 +27,19 @@ import java.util.Map;
 
 public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.Config>{
     public static class Config {
+        private String sourcePath = "/../assets";
         private String url = "assets/";
         private String indexFile = "index.html";
         private Map<String,Object> assets;
+
+        public Config sourcePath(String sourcePath) {
+          this.sourcePath = sourcePath;
+          return this;
+        }
+
+        public String getSourcePath() {
+          return this.sourcePath;
+        }
 
         public Config url(String url) {
           this.url = url;
@@ -63,6 +74,7 @@ public class AssetPipelineModule extends ConfigurableModule<AssetPipelineModule.
     protected void configure() {
         bind(AssetPipelineService.class).in(Singleton.class);
         bind(AssetPipelineHandler.class).in(Singleton.class);
+        bind(ProductionAssetCache.class).in(Singleton.class);
 
         Multibinder.newSetBinder(binder(), HandlerDecorator.class).addBinding().toInstance((registry, rest) ->
           Handlers.chain(rest, Handlers.chain(registry, (c) -> c.all(AssetPipelineHandler.class)))
