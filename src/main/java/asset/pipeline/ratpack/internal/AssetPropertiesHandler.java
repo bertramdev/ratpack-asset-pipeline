@@ -22,6 +22,8 @@ import ratpack.handling.Context;
 import ratpack.handling.Handler;
 import ratpack.path.PathBinding;
 
+import java.nio.charset.Charset;
+
 import static ratpack.registry.Registry.single;
 
 public class AssetPropertiesHandler implements Handler {
@@ -51,7 +53,7 @@ public class AssetPropertiesHandler implements Handler {
   private static String getEncoding(Context context) {
     String encoding = context.getRequest().getQueryParams().get("encoding");
     if(encoding == null) {
-      encoding = context.getRequest().getBody().getContentType().getCharset();;
+      encoding = Charset.defaultCharset().name();
     }
     return encoding;
   }
