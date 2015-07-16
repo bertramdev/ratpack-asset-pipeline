@@ -43,7 +43,7 @@ class ProductionFunctionalSpec extends Specification {
   @Delegate
   EmbeddedApp app = of({ spec ->
     spec
-        .serverConfig(ServerConfig.embedded(PROD_BASE_DIR).development(false))
+        .serverConfig(ServerConfig.embedded().baseDir(PROD_BASE_DIR.toAbsolutePath()).development(false))
         .registry(Guice.registry { b -> b
           .module(AssetPipelineModule)
         })

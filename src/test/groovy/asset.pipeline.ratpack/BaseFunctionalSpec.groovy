@@ -18,6 +18,7 @@ package asset.pipeline.ratpack
 
 import ratpack.func.Action
 import ratpack.guice.Guice
+import ratpack.server.BaseDir
 import ratpack.server.RatpackServerSpec
 import ratpack.server.ServerConfig
 import ratpack.test.embed.EmbeddedApp
@@ -31,7 +32,7 @@ class BaseFunctionalSpec extends Specification {
   @AutoCleanup
   @Delegate
   EmbeddedApp app = of({ spec -> spec
-    .serverConfig(ServerConfig.embedded(BASE_DIR))
+    .serverConfig(ServerConfig.embedded().baseDir(BASE_DIR.toAbsolutePath()))
     .registry(Guice.registry { b -> b
       .module(AssetPipelineModule)
     })
