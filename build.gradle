@@ -46,10 +46,12 @@ ext {
 }
 
 dependencies {
+  provided "io.ratpack:ratpack-guice:${ratpackVersion}"
+  provided "org.slf4j:slf4j-simple:${slf4jVersion}"
+
   compile "com.bertramlabs.plugins:asset-pipeline-core:2.3.8"
-  compile "io.ratpack:ratpack-guice:${ratpackVersion}"
   compile "org.codehaus.groovy:groovy-all:${groovyVersion}"
-  runtime "org.slf4j:slf4j-simple:${slf4jVersion}"
+
   testCompile "org.spockframework:spock-core:${spockVersion}"
   testCompile "cglib:cglib:${cglibVersion}"
   testCompile "org.objenesis:objenesis:${objenesisVersion}"
