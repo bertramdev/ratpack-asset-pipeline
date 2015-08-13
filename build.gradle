@@ -17,7 +17,7 @@ apply plugin: 'maven'
 apply plugin: 'com.jfrog.bintray'
 
 group = 'com.bertramlabs.plugins'
-version = '2.4.3'
+version = '2.5.0'
 
 repositories {
     jcenter()
@@ -38,7 +38,7 @@ sourceSets {
 ext {
   isReleaseVersion = !version.endsWith("SNAPSHOT")
   slf4jVersion = "1.7.10"
-  ratpackVersion = "0.9.18"
+  ratpackVersion = "0.9.19"
   spockVersion = "1.0-groovy-2.4"
   cglibVersion = "2.2.2"
   objenesisVersion = "2.1"

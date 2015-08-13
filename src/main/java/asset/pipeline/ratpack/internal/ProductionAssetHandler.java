@@ -81,7 +81,7 @@ public class ProductionAssetHandler implements Handler {
         response.status(404).send();
       }
     } else {
-      readAttributes(ctx, asset, attributes -> {
+      readAttributes(asset, attributes -> {
         if (attributes == null || !attributes.isRegularFile()) {
 
           if(props.getIndexedPath() != null && attributes != null) {
@@ -106,7 +106,7 @@ public class ProductionAssetHandler implements Handler {
           if(responseBuilder.statusCode == null || responseBuilder.statusCode != 304) {
             Path gzipFile = ctx.file(ASSET_BASE_PATH + manifestPath + ".gz");
             if(acceptsGzip(ctx)) {
-              readAttributes(ctx, gzipFile, gzipAttributes -> {
+              readAttributes(gzipFile, gzipAttributes -> {
                 if (gzipAttributes == null || !gzipAttributes.isRegularFile()) {
                   response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(attributes.size()));
                   fileCache.put(manifestPath,new AssetAttributes(true,false,false, attributes.size() , null));
@@ -121,7 +121,7 @@ public class ProductionAssetHandler implements Handler {
             } else {
               response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, Long.toString(attributes.size()));
               response.noCompress().sendFile(asset);
-              readAttributes(ctx, gzipFile, gzipAttributes -> {
+              readAttributes(gzipFile, gzipAttributes -> {
                 if (gzipAttributes == null || !gzipAttributes.isRegularFile()) {
                   fileCache.put(manifestPath,new AssetAttributes(true,false,false, attributes.size() , null));
                 } else {
