@@ -16,9 +16,10 @@
 
 package asset.pipeline.ratpack
 
+import ratpack.error.ClientErrorHandler
 import ratpack.func.Action
 import ratpack.guice.Guice
-import ratpack.server.BaseDir
+import ratpack.handling.Context
 import ratpack.server.RatpackServerSpec
 import ratpack.server.ServerConfig
 import ratpack.test.embed.EmbeddedApp
@@ -35,6 +36,11 @@ class BaseFunctionalSpec extends Specification {
     .serverConfig(ServerConfig.embedded().baseDir(BASE_DIR.toAbsolutePath()))
     .registry(Guice.registry { b -> b
       .module(AssetPipelineModule)
+      .module({
+        it.bind(ClientErrorHandler).toInstance({ Context context, int statusCode ->
+          context.response.status(404).send("from error handler")
+        } as ClientErrorHandler)
+      })
     })
     .handlers { c -> c
       .get { ctx -> ctx.render("base") }
@@ -74,5 +80,14 @@ class BaseFunctionalSpec extends Specification {
     then:
     response.statusCode == 200
     response.body.text == "foo"
+  }
+
+  void "client error handler should be delegated to when requesting a non existing path"() {
+    when:
+    def response = httpClient.get("not-existing-path")
+
+    then:
+    response.statusCode == 404
+    response.body.text == "from error handler"
   }
 }

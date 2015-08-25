@@ -42,7 +42,7 @@ public class DevelopmentAssetHandler implements Handler {
     } else if (props.getIndexedPath() != null) {
       ctx.insert(single(new AssetProperties(props.getIndexedPath(), null, props.getFormat(), props.getEncoding())), this);
     } else {
-      ctx.getResponse().status(404).send();
+      ctx.next();
     }
   }
 
