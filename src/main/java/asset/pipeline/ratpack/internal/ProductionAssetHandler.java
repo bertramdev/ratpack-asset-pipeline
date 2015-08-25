@@ -78,7 +78,7 @@ public class ProductionAssetHandler implements Handler {
       } else if(attributeCache.isDirectory()) {
         doIndexFileNext(ctx, props);
       } else {
-        response.status(404).send();
+        ctx.next();
       }
     } else {
       readAttributes(asset, attributes -> {
@@ -89,7 +89,7 @@ public class ProductionAssetHandler implements Handler {
             doIndexFileNext(ctx, props);
           } else {
             fileCache.put(manifestPath,new AssetAttributes(false,false,false, null , null));
-            response.status(404).send();
+            ctx.next();
           }
         } else {
           response.contentTypeIfNotSet(props.getFormat());
