@@ -1,5 +1,8 @@
 ## Ratpack Asset-Pipeline
 
+
+**MOVED**: This project has moved to a sub project of the main asset-pipeline repository [http://github.com/bertramdev/asset-pipeline](http://github.com/bertramdev/asset-pipeline)
+
 This module provides runtime for both development and production to the Ratpack framework for rendering files compiled by Asset-Pipeline. This should be paired with the asset-pipeline-gradle plugin appropriately
 
 **NOTE**: Version `2.3.0` has resulted in a change of config and asset location. Please read the documentation below if needing to upgrade.
